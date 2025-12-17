@@ -1,43 +1,36 @@
-"""
-This module takes care of starting the API Server, Loading the DB and Adding the endpoints
-"""
 from flask import request, jsonify, Blueprint
 from api.models import db, User
-from flask_cors import CORS
-
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import (
     create_access_token,
     jwt_required,
     get_jwt_identity
 )
-
 api = Blueprint('api', __name__)
-CORS(api)
+
+# 🔐 SIGNUP
 
 
-@api.route('/hello', methods=['GET'])
-def handle_hello():
-    return jsonify({ "message": "Hello from backend" }), 200
-
-
-# 🔐 REGISTRO
 @api.route("/signup", methods=["POST"])
 def signup():
     body = request.get_json()
 
-    if not body.get("email") or not body.get("password"):
+    if not body:
+        return jsonify({"msg": "No data"}), 400
+
+    email = body.get("email")
+    password = body.get("password")
+
+    if not email or not password:
         return jsonify({"msg": "Missing data"}), 400
 
-    user = User.query.filter_by(email=body["email"]).first()
-    if user:
+    if User.query.filter_by(email=email).first():
         return jsonify({"msg": "User already exists"}), 400
 
-    hashed_password = generate_password_hash(body["password"])
-
     new_user = User(
-        email=body["email"],
-        password=hashed_password
+        email=email,
+        password=generate_password_hash(password),
+        is_active=True
     )
 
     db.session.add(new_user)
@@ -51,21 +44,24 @@ def signup():
 def login():
     body = request.get_json()
 
-    user = User.query.filter_by(email=body["email"]).first()
+    email = body.get("email")
+    password = body.get("password")
 
-    if not user or not check_password_hash(user.password, body["password"]):
+    user = User.query.filter_by(email=email).first()
+
+    if not user or not check_password_hash(user.password, password):
         return jsonify({"msg": "Bad credentials"}), 401
 
-    token = create_access_token(identity=user.id)
-    return jsonify({ "token": token }), 200
+    token = create_access_token(identity=str(user.id))
+
+    return jsonify({"token": token}), 200
 
 
-# 🔒 RUTA PRIVADA
 @api.route("/private", methods=["GET"])
 @jwt_required()
 def private():
-    current_user_id = get_jwt_identity()
+    user_id = get_jwt_identity()
     return jsonify({
         "msg": "Acceso autorizado",
-        "user_id": current_user_id
+        "user_id": user_id
     }), 200

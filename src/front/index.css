@@ -1,0 +1,53 @@
+.privatepage {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: aqua;
+  height: 500px;
+}
+
+.pageP {
+  display: flex;
+  flex-direction: column;
+}
+
+.loginnice {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: aqua;
+  height: 600px;
+}
+
+.signup {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: aqua;
+  height: 600px;
+  margin: 4px;
+  padding: 5px;
+}
+.signup2 {
+  margin: 4px;
+  padding: 5px;
+}
+.input-modern {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.input-modern:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+}
+
+.loginnice2 {
+  margin: 4px;
+  padding: 5px;
+}

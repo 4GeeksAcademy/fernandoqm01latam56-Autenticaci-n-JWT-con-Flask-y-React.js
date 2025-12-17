@@ -6,34 +6,49 @@ export const Private = () => {
     const [message, setMessage] = useState("");
 
     useEffect(() => {
-        const token = sessionStorage.getItem("token");
+        const loadPrivate = async () => {
+            const token = localStorage.getItem("token");
 
-        if (!token) {
-            navigate("/login");
-            return;
-        }
-
-        fetch(import.meta.env.BACKEND_URL + "/api/private", {
-            headers: {
-                Authorization: "Bearer " + token
-            }
-        })
-            .then(resp => {
-                if (!resp.ok) throw new Error("Unauthorized");
-                return resp.json();
-            })
-            .then(data => setMessage(data.msg))
-            .catch(() => {
-                sessionStorage.removeItem("token");
+            if (!token) {
                 navigate("/login");
-            });
+                return;
+            }
 
-    }, []);
+            try {
+                const resp = await fetch(
+                    import.meta.env.VITE_BACKEND_URL + "/api/private",
+                    {
+                        method: "GET",
+                        headers: {
+                            "Authorization": `Bearer ${token}`,
+                            "Content-Type": "application/json"
+                        }
+                    }
+                );
+
+                if (!resp.ok) {
+                    throw new Error("Unauthorized");
+                }
+
+                const data = await resp.json();
+                setMessage(data.msg);
+
+            } catch (err) {
+                console.error("Error private:", err);
+                localStorage.removeItem("token");
+                navigate("/login");
+            }
+        };
+
+        loadPrivate();
+    }, [navigate]);
 
     return (
-        <div>
-            <h1>Private Page</h1>
-            <p>{message}</p>
+        <div className="privatepage">
+            <div className="pageP">
+                <h1>Private Page</h1>
+                <p>{message}</p>
+            </div>
         </div>
     );
 };

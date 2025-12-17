@@ -12,46 +12,61 @@ export const Login = () => {
     e.preventDefault();
     setError(null);
 
-    const resp = await fetch(import.meta.env.BACKEND_URL + "/api/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password })
-    });
+    try {
+      const resp = await fetch(
+        import.meta.env.VITE_BACKEND_URL + "/api/login",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password })
+        }
+      );
 
-    const data = await resp.json();
+      if (!resp.ok) {
+        const text = await resp.text();
+        throw new Error(text || "Login failed");
+      }
 
-    if (!resp.ok) {
-      setError(data.msg || "Login failed");
-      return;
+      const data = await resp.json();
+
+      localStorage.setItem("token", data.token);
+      navigate("/private");
+
+    } catch (err) {
+      console.error(err);
+      setError("Credenciales inválidas o servidor no disponible");
     }
-
-    sessionStorage.setItem("token", data.token);
-    navigate("/private");
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <h2>Login</h2>
+    <form className="loginnice" onSubmit={handleSubmit}>
+      <div className="loginnice2">
+        <h2>Login</h2>
 
-      <input
-        type="email"
-        placeholder="Email"
-        value={email}
-        onChange={e => setEmail(e.target.value)}
-        required
-      />
+        <input
+          className="input-modern"
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+          required
+        />
 
-      <input
-        type="password"
-        placeholder="Password"
-        value={password}
-        onChange={e => setPassword(e.target.value)}
-        required
-      />
+        <input
+          className="input-modern"
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={e => setPassword(e.target.value)}
+          required
+        />
 
-      {error && <p style={{ color: "red" }}>{error}</p>}
+        {error && <p style={{ color: "red" }}>{error}</p>}
 
-      <button type="submit">Login</button>
+        <button className="btn btn-primary" type="submit">Login</button>
+      </div>
+
+
     </form>
   );
 };
